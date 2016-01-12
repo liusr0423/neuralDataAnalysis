@@ -1,4 +1,5 @@
 *.mat
 *.png
 *.ncs
+.DS_Store
 Data/*
