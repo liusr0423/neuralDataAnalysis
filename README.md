@@ -1,4 +1,4 @@
-# neuralDataAnalysis
+README
 
 Practice codes for neural data analysis class.
 
