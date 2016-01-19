@@ -1,5 +1,5 @@
 %% set MATLAB's current directory to the data folder (R042-2013-08-18);
-cd('/Users/liusirui/Documents/MATLAB/class/neuralDataAnalysis/Data/R016/R042-2013-08-18_promoted'); 
+cd('/Users/liusirui/Documents/MATLAB/class/neuralDataAnalysis/Data/R042-2013-08-18'); 
 
 %% load video data 
 % (make sure the VT1.zip file is unzipped first and now present in MATLAB's working folder!)
