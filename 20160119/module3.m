@@ -1,5 +1,5 @@
 %% set MATLAB's current directory to the data folder (R042-2013-08-18);
-fd = '/Users/liusirui/Documents/MATLAB/class/neuralDataAnalysis/Data/R042-2013-08-18';
+fd = '/Users/sirui/Documents/MATLAB/class/neuralDataAnalysis/Data/R042-2013-08-18';
 cd(fd);
 %% load the data (note, may need to unzip position data first)
 cfg = [];
