@@ -158,30 +158,37 @@ H = fvtool(b,a);
 zoom(H,'x',[.2,.3])
 
 %% new method
+Fs = 500; %Hz
 [z,p,k] = butter(10, [59 61] * 2 / Fs, 'stop'); % note, we ask for 3 outputs instead of 2
 [sos,g] = zp2sos(z,p,k); % convert to SOS format
-h = dfilt.df2sos(sos,g); % create filter object: ?second-order section? format 
+h = dfilt.df2sos(sos,g); % create filter object: 'second-order section' format 
 fvtool(h);
 
 %% test on white noise using filtfilt()
-
 %generate white noise
 Fs = 500; %Hz
 dt = 1./Fs;
 twin = [0 10]; 
 tvec = twin(1):dt:twin(2)-dt; 
-x = rand(1,length(tvec));
+x = rand(size(tvec));
+% filter with notch filter to remove 60hz line noise
+xf = filtfilt(sos,g,x);
+xf = xf/200;
 
+figure 
+set(gcf,'color','w')
+plot(tvec,x,'k',tvec,xf,'r-'); hold on;
+legend({'original','filtered(band-stop 60hz)'});
+xlim([0 0.4]);
+%% 
 % get original PSD in dB using a 512-samping Hanning window evaluated over
 % 2^14 points
 wSize = 512;
 nP = 2^14;
 [Porig,Forig] = pwelch(x,hanning(wSize),wSize/2,nP,Fs);
 
-% apply filter to signal
-sf = filtfilt(h.sosMatrix,h.ScaleValues,x);
 % get filtered PSD
-[Pfilt,Ffilt] = pwelch(sf,hanning(wSize),wSize/2,nP,Fs);
+[Pfilt,Ffilt] = pwelch(xf,hanning(wSize),wSize/2,nP,Fs);
 
 figure
 set(gcf,'color','w')
@@ -198,7 +205,7 @@ subplot(1,2,2)
 plot(Ffilt,10*log10(Pfilt),'b'); 
 xlabel('Frequency (Hz)');
 ylabel('Power (dB)');
-%set(gca,'YLim',[-140,-20])
+set(gca,'YLim',[-140,-20])
 set(gca,'XLim',[0,250])
 set(gca,'XTick',0:50:250)
 title('filtered')
@@ -214,15 +221,14 @@ s1 = sin(2*pi*f1*tvec+pi/6);
 s2 = sin(2*pi*f2*tvec);
 s = s1 + s2;
 
-[z,p,k] = butter(10, [59 61] * 2 / Fs, 'stop'); % note, we ask for 3 outputs instead of 2
-[sos,g] = zp2sos(z,p,k); % convert to SOS format
+sf = filtfilt(sos,g,s);
+sf = sf/200;
 
-sf = filtfilt(h.sosMatrix,h.ScaleValues,x);
 figure 
 set(gcf,'color','w')
-plot(tvec,s,'k',tvec,sf,'r--'); hold on;
-legend({'original','filtered'});
-xlim([0 0.2]);
+plot(tvec,s,'k',tvec,sf,'r-'); hold on;
+legend({'original','filtered(band-stop 60hz)'});
+xlim([0 0.4]);
 
 %% Detecting movement artifacts
 % cd to your location here
