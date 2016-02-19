@@ -173,7 +173,7 @@ tvec = twin(1):dt:twin(2)-dt;
 x = rand(size(tvec));
 % filter with notch filter to remove 60hz line noise
 xf = filtfilt(sos,g,x);
-xf = xf/200;
+
 
 figure 
 set(gcf,'color','w')
@@ -193,21 +193,21 @@ nP = 2^14;
 figure
 set(gcf,'color','w')
 subplot(1,2,1)
-plot(Forig,10*log10(Porig),'b'); 
+plot(Forig,20*log10(Porig),'b'); 
 xlabel('Frequency (Hz)');
 ylabel('Power (dB)');
 set(gca,'YLim',[-140,-20])
 set(gca,'XLim',[0,250])
-set(gca,'XTick',0:50:250)
+set(gca,'XTick',0:10:250)
 title('original')
 grid on
 subplot(1,2,2)
-plot(Ffilt,10*log10(Pfilt),'b'); 
+plot(Ffilt,20*log10(Pfilt),'b'); 
 xlabel('Frequency (Hz)');
 ylabel('Power (dB)');
 set(gca,'YLim',[-140,-20])
 set(gca,'XLim',[0,250])
-set(gca,'XTick',0:50:250)
+set(gca,'XTick',0:10:250)
 title('filtered')
 grid on
 
@@ -222,7 +222,7 @@ s2 = sin(2*pi*f2*tvec);
 s = s1 + s2;
 
 sf = filtfilt(sos,g,s);
-sf = sf/200;
+
 
 figure 
 set(gcf,'color','w')
