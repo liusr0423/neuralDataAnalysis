@@ -359,14 +359,13 @@ csc_pre.cfg.hdr{1}.SamplingFrequency = csc_pre.cfg.hdr{1}.SamplingFrequency./dsf
 Fs = 1./mean(diff(csc_pre.tvec));
 
 %% compute the spectrum
-wSize = 1024;
 [Pxx,F] = periodogram(csc_pre.data,hamming(length(csc_pre.data)),length(csc_pre.data),Fs);
 plot(F,10*log10(Pxx),'k'); xlabel('Frequency (Hz)'); ylabel('Power (dB)');
 xlim([0 150]);
 
 %% use Welch spectrum instead, using a Hamming window of the same size and 50% overlap
-
-[Pxx,F] = pwelch(csc_pre.data,rectwin(wSize),[],[],Fs);
+wSize = 1024;
+[Pxx,F] = pwelch(csc_pre.data,hamming(wSize),[],[],Fs);
 hold on;
 plot(F,10*log10(Pxx),'r'); xlabel('Frequency (Hz)');ylabel('Power (dB)');
 

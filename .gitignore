@@ -3,3 +3,4 @@
 *.ncs
 .DS_Store
 Data/*
+.cshrc
