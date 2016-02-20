@@ -174,7 +174,6 @@ x = rand(size(tvec));
 % filter with notch filter to remove 60hz line noise
 xf = filtfilt(sos,g,x);
 
-
 figure 
 set(gcf,'color','w')
 plot(tvec,x,'k',tvec,xf,'r-'); hold on;
@@ -193,21 +192,21 @@ nP = 2^14;
 figure
 set(gcf,'color','w')
 subplot(1,2,1)
-plot(Forig,20*log10(Porig),'b'); 
+plot(Forig,10*log10(Porig),'b'); 
 xlabel('Frequency (Hz)');
 ylabel('Power (dB)');
 set(gca,'YLim',[-140,-20])
 set(gca,'XLim',[0,250])
-set(gca,'XTick',0:10:250)
+set(gca,'XTick',0:50:250)
 title('original')
 grid on
 subplot(1,2,2)
-plot(Ffilt,20*log10(Pfilt),'b'); 
+plot(Ffilt,10*log10(Pfilt),'b'); 
 xlabel('Frequency (Hz)');
 ylabel('Power (dB)');
 set(gca,'YLim',[-140,-20])
 set(gca,'XLim',[0,250])
-set(gca,'XTick',0:10:250)
+set(gca,'XTick',0:50:250)
 title('filtered')
 grid on
 
@@ -258,3 +257,55 @@ chew_power_filtered = medfilt1(chew_power,101); % filter window is specified in 
 [h1 h2] = plotyy(cscR.tvec,cscR.data,cscR.tvec,chew_power_filtered);
 
 
+%% detect SWR events
+
+rootDir = '/Users/sirui/Documents/MATLAB/class/neuralDataAnalysis/Data/R042-2013-08-18';
+cd(rootDir);
+cfg = []; cfg.fc = {'R042-2013-08-18-CSC03a.ncs'};
+lfp = LoadCSC(cfg);
+%% filter in SWR band
+cfg = [];
+cfg.f = [140 220]; % filter range to use (Hz)
+cfg.display_filter = 0; % show output of fvtool on filter
+SWRf = FilterLFP(cfg,lfp); %input: tsd with LFP data; output: tsd with filtered data
+
+%% obtain power and z-score it
+SWRp = LFPpower([],SWRf); % input: tsd with filtered LFP data; output: tsd with power envelope obtained by Hilbert transform
+SWRp_z = zscore_tsd(SWRp); %   z-scores data
+
+%% detect events
+cfg = [];
+cfg.method = 'raw';
+cfg.threshold  = 3;
+cfg.operation = '>'; % return intervals where threshold is 
+cfg.merge_thr = .05; % merge event closer than this
+cfg.minlen = .05; % minimum interval length
+%  create interval data from tsd by tresholding
+SWR_evt = TSDtoIV(cfg,SWRp_z);
+
+%% to each event, add a field with the max z-scored power (for later selection)
+cfg = [];
+cfg.method = 'max'; % 'min', 'mean'
+cfg.label = 'maxSWRp'; % what to call this in iv, i.e. usr.label
+% AddTSDtoIV(cfg_in,iv_in,tsd_in): add usr field to iv based on tsd
+SWR_evt = AddTSDtoIV(cfg,SWR_evt,SWRp_z); 
+
+%% select only those events of >5 z-scored power
+cfg = [];
+cfg.operation = '>';
+cfg.threshold = 5;
+SWR_evt = SelectIV(cfg,SWR_evt,'maxSWRp'); % select iv from iv
+%% plot events in highlighted on top of full lfp
+PlotTSDfromIV([],SWR_evt,lfp); % display intervals defined relative to tsd
+%% ..or the events alone (fixed 200ms window) centered at event time)
+close all;
+cfg = [];
+cfg.display = 'iv';%only plot iv's
+cfg.mode = 'center'; % plot each iv using specific time window ('center')
+cfg.fgcol = 'k';% tsd color outside iv's
+PlotTSDfromIV(cfg,SWR_evt,lfp);
+%% ..hold on (highlight edges of event on top of previous plot)
+cfg = [];
+cfg.display = 'iv';%only plot iv's
+cfg.fgcol = 'r';%tsd color within iv's
+PlotTSDfromIV(cfg,SWR_evt,lfp);
