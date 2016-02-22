@@ -1,6 +1,6 @@
 %% basics using spectrogram() function
 % cd to your location here
-rootDir = '/Users/liusirui/Documents/MATLAB/class/neuralDataAnalysis/Data/R016-2012-10-03';
+rootDir = '/Users/sirui/Documents/MATLAB/class/neuralDataAnalysis/Data/R016-2012-10-03';
 cd(rootDir);
 cfg = [];
 cfg.fc = {'R016-2012-10-03-CSC04a.Ncs'};
@@ -107,9 +107,9 @@ evt = LoadEvents(cfg);
 
 %% Loading Neuralynx data into FieldTrip
 % remember to cd to your data folder
-rootDir = '/Users/liusirui/Documents/MATLAB/class/neuralDataAnalysis/Data/R016-2012-10-03';
+rootDir = '/Users/sirui/Documents/MATLAB/class/neuralDataAnalysis/Data/R016-2012-10-03';
 cd(rootDir);
-fc = {'R016-2012-10-03-CSC02b.ncs'};
+fc = {'R016-2012-10-03-CSC04a.ncs'};
 data = ft_read_neuralynx_interp(fc);
 
 cfg = [];
