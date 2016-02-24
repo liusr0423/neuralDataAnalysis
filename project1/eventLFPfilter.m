@@ -1,14 +1,13 @@
-function ftrl_evt = eventLFPfilter(cfg_f,cfg_t,trl)
-% EVENTLFPFILTER filters LFP in certain frequency band and output
-% time intervals of intervals detected after filtering
+function [ftrl,ftrl_evt] = eventLFPfilter(cfg_f,cfg_t,trl)
+% EVENTLFPFILTER filters LFP and threshold the filtered data (optional)  
 % 
 % REQUIRED input: 
-%                  trl:   tsd with LFP data
-%                  cfg_f.f: filter range to use
+%                  trl:     tsd with LFP data
 % CFG_f filter options with defaults from function FilterLFP():
 %                  cfg_f.order = 4; % filter order
 %                  cfg_f.display_filter = 0; % show output of fvtool on filter
 %                  cfg_f.bandtype = 'bandpass'; % 'highpass', 'lowpass'
+%                  cfg_f.f = [6 10]; filter range to use (in Hz)
 %                  cfg_f.R = 0.5; % passband ripple (in dB) for Chebyshev filters only
 %                  cfg_f.ftype = 'butter'; {'cheby1','butter','fdesign'}
 %                  cfg_f.verbose = 1; If 1 display helpful text in command window, if 0 don't
@@ -22,28 +21,23 @@ function ftrl_evt = eventLFPfilter(cfg_f,cfg_t,trl)
 %                  cfg.verbose = 1; 1 display command window, 0 don't
 %
 %  OUTPUT:         
+%                  ftrl : filtered LFP
 %                  ftrl_evt: time intervals of events detected after 
 %                            filtering   
 % 
 % Feb-22-2016 by Sirui Liu 
 
-if isempty(cfg_f.f)
-    error('Please specify a filter range to use (Hz)! Ex.cfg.f = [140 200];')
-end
-
-% filter trial LFP in frequency band specified
+% filter trial LFP
+cfg_f.verbose = 0;
 ftrl = FilterLFP(cfg_f,trl);
 
-% obtain power and z-score it
-ftrl_p = LFPpower([],ftrl);
-ftrl_z = zscore_tsd(ftrl_p);
+if cfg_t % if thresholding for event detection
+    
+    % obtain power and z-score it
+    ftrl_p = LFPpower([],ftrl);
+    ftrl_z = zscore_tsd(ftrl_p);
+    ftrl_evt = TSDtoIV(cfg_t,ftrl_z);
 
-% detect events by thresholding
-cfg_def.method = 'raw';
-cfg_def.threshold = 3;
-cfg_def.operation =  '>'; % return intervals where threshold is exceeded
-mfun = mfilename;
-cfg_t = ProcessConfig(cfg_def,cfg_t,mfun);  % replace default cfg_def with cfg_t
-ftrl_evt = TSDtoIV(cfg_t,ftrl_z);
-        
+end
+
 end

@@ -1,51 +1,62 @@
 function eventLFPplot(cfg,csc)
 % EVENTLFPPLOT plots the event-triggered LFP traces of data csc
-% with the option of filtering the LFP of each trial and plotting the 
-% detected intervals on top of the LFP traces
+% with the options of 
+% 1. Decimate:         resample data at 1/R times the original sample 
+%                      rate after lowpass filtering before plotting 
+% 2. Signal Filtering: filtering the LFP of each trial before plotting
+% 3. Event Detection:  thresholding the filtered data and plot the detected 
+%                      intervals on top of the LFP traces after 
 % INPUTS required:  
-%                  csc: tsd LFP data
+%                  csc:            tsd with LFP data
 %                  cfg.eventTimes: cell array of timestamps of events of 
 %                                  interest
 %                  
-%        optional: cfg.twin: time window of interest (seconds relative to 
-%                            the event times), defualt is [-1 3]
-%                  cfg.eventLabel: event labels to put on plot
-%                  cfg.f: filter range to use, if filtering LFP to detect 
-%                         events 
+%        optional: 
+%                  cfg.eventLabel: corresponding event labels to put on
+%                                  plot
+%                  cfg.twin:       time window of interest (seconds 
+%                                  relative to the event times), defualt 
+%                                  is [-1 3]
+%                  cfg.filter.f: filter options with defaults from FilterLFP()
+%                  cfg.filter.t: threshold options with defaults modified from TSDtoIV()
+%                  cfg.plot: if 1 plot the detected events on top of the LFP trace, defualt = 0
+%                  cfg.r: resample data at cfg.r times of the 
+%                         original sample rate, if decimate
 %                
 % 
 % Sirui Liu  Feb-22-2016  
 
-if isempty(cfg.twin)
+if ~isfield(cfg.twin)
     twin = [-1,3];
 else 
     twin = cfg.twin;
 end
-
 
 for ii = 1:length(cfg.eventTimes) % for each event
     figure(ii)
     
     % extract trial timestamps of this event
     trials = cfg.eventTimes{ii};
-   
+    
     for n = 1:length(trials) % for each trial of this event
         
         % extract the corresponding piece of LFP according to time window
         % specified of this trial
         trl = restrict(csc,trials(n) + twin(1),trials(n) + twin(2)); 
         
-        % filter trial LFP in frequency band as specified in cfg.f, if any
-        if cfg.f
-            ftrl_evt = eventLFPfilter(struct('f',cfg.f,'verbose',0),struct('verbose',0),trl);
-            
-            % replace the original time axis with a new one based on the
-            % time window asked for
-            ftrl_evt.tstart = ftrl_evt.tstart  - (trl.tvec(1) - twin(1));
-            ftrl_evt.tend = ftrl_evt.tend - (trl.tvec(1) - twin(1));
+        % filtering tril LFP if specified
+        if isfield(cfg,'filter')
+         
+           [trl,ftrl_evt] = eventLFPfilter(cfg.filter,cfg.threshold,trl);
         end
         
-        % replace the original time axis with a new one based on the time 
+        % decimate trial LFP if specified
+        if isfield(cfg,'decimate')
+            trl.data = decimate(trl.data,cfg.r);
+            trl.tvec = trl.tvec(1:length(trl.data));
+        end
+        
+        % replace the original time axis with a new one based on the time
         % window asked for 
         trl.tvec = trl.tvec - (trl.tvec(1) - twin(1));
         
@@ -69,8 +80,15 @@ for ii = 1:length(cfg.eventTimes) % for each event
         end
         
         % plot detected intervals after filtering on top of the LFP traces
-        if cfg.f
+        if isfield(cfg,'plot') && cfg.plot == 1
+            
+            % replace the original time axis with a new one based on the
+            % time window asked for
+            ftrl_evt.tstart = ftrl_evt.tstart  - (trl.tvec(1) - twin(1));
+            ftrl_evt.tend = ftrl_evt.tend - (trl.tvec(1) - twin(1));
+            
             PlotTSDfromIV([],ftrl_evt,trl);  
+       
         end
 
     end
