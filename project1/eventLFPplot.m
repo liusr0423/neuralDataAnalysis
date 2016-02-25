@@ -17,11 +17,18 @@ function eventLFPplot(cfg,csc)
 %                  cfg.twin:       time window of interest (seconds
 %                                  relative to the event times), defualt
 %                                  is [-1 3]
-%                  cfg.filter.f: filter options with defaults from FilterLFP()
-%                  cfg.filter.t: threshold options with defaults modified from TSDtoIV()
-%                  cfg.plot: if 1 plot the detected events on top of the LFP trace, defualt = 0
-%                  cfg.r: resample data at cfg.r times of the
-%                         original sample rate, if decimate
+%                  cfg.filter.f:   filter options with defaults from
+%                                  FilterLFP()
+%                  cfg.filter.t:   threshold options with defaults modified
+%                                  from TSDtoIV()
+%                  cfg.plot:       default = 0: plot the original LFP trace
+%                                  if 1 plot the filtered LFP trace
+%                                  if 2 plot the detected events on top of
+%                                  the original LFP trace
+%                                  if 3 plot the detected events on top of
+%                                  the filtered LFP trace
+%                  cfg.r:          resample data at cfg.r times of the
+%                                  original sample rate, if decimate
 %
 %
 % Sirui Liu  Feb-22-2016
@@ -32,8 +39,11 @@ else
     twin = cfg.twin;
 end
 
+if ~isfield(cfg,'plot')
+    cfg.plot = 0;
+end
+
 for ii = 1:length(cfg.eventTimes) % for each event
-    figure(ii)
     
     % extract trial timestamps of this event
     trials = cfg.eventTimes{ii};
@@ -44,27 +54,42 @@ for ii = 1:length(cfg.eventTimes) % for each event
         % specified of this trial
         trl = restrict(csc,trials(n) + twin(1),trials(n) + twin(2));
         
-        % filtering tril LFP if specified
+        % filtering trial LFP if specified
         if isfield(cfg,'filter')
             
-            trl = FilterLFP(cfg.filter,trl);
+            ftrl = FilterLFP(cfg.filter,trl);
             
             if isfield(cfg,'t') % thresholding for event detection
+                % if specified
                 
-                ftrl_p = LFPpower([],trl);
-                ftrl_z = zscore_tsd(ftrl_p);
-                ftrl_evt = TSDtoIV(cfg.t,ftrl_z);
+                ftrl_p = LFPpower([],ftrl);       % obtain power
+                ftrl_z = zscore_tsd(ftrl_p);      % z-score it
+                ftrl_evt = TSDtoIV(cfg.t,ftrl_z); % detect events
                 
-                % replace the original time axis of detected events with a new
-                % one based on the time window asked for
-                ftrl_evt.tstart = ftrl_evt.tstart  - (trl.tvec(1) - twin(1));
-                ftrl_evt.tend = ftrl_evt.tend - (trl.tvec(1) - twin(1));
-           
+                % to each event, add a field with the max z-scored power
+                % (for later selection)
+                ftrl_evt = AddTSDtoIV(struct('method','max','label',...
+                    'maxP'),ftrl_evt,ftrl_z);
+                if ~isempty(ftrl_evt.usr.maxP)
+                    % select only those events of >5 z-scored power
+                    ftrl_evt = SelectIV(struct('operation','>',...
+                        'threshold',5),ftrl_evt,'maxP');
+                end
+                
+                % replace the original time axis of detected events with a
+                % new one based on the time window asked for
+                ftrl_evt.tstart = ftrl_evt.tstart - (ftrl.tvec(1) - ...
+                    twin(1));
+                ftrl_evt.tend = ftrl_evt.tend - (ftrl.tvec(1) - twin(1));
             end
         end
         
+        if  isfield(cfg,'plot') && mod(cfg.plot,2)
+            trl = ftrl;
+        end
+        
         % decimate trial LFP if specified
-        if isfield(cfg,'decimate')
+        if isfield(cfg,'r')
             trl.data = decimate(trl.data,cfg.r);
             trl.tvec = trl.tvec(1:length(trl.data));
         end
@@ -83,20 +108,18 @@ for ii = 1:length(cfg.eventTimes) % for each event
         % add a y-offset to the LFP to plot one above the other
         trl.data = trl.data + lfp_cent;
         
-        % plot the event-triggered LFP traces
+        % plot only the event-triggered LFP traces
+        figure(ii)
         plot(trl.tvec,trl.data,'k');
         hold on
+        % plot detected intervals on top of the LFP traces
+        if cfg.plot == 2 || cfg.plot == 3
+            PlotTSDfromIV([],ftrl_evt,trl);
+        end
         
         % add event label to plot, if any
         if ~isempty(cfg.eventLabel)
             title(cfg.eventLabel{ii},'FontSize',20);
-        end
-        
-        % plot detected intervals after filtering on top of the LFP traces
-        if isfield(cfg,'plot') && cfg.plot == 1
-            
-            PlotTSDfromIV([],ftrl_evt,trl);
-            
         end
         
     end
@@ -105,7 +128,9 @@ for ii = 1:length(cfg.eventTimes) % for each event
     y1 = get(gca,'ylim');
     plot([0,0],y1)
     set(gca,'FontSize',20);
-    axis xy; xlabel('time (s)'); ylabel('trial');
+    xlabel('time (s)'); ylabel('trial');
+    set(gca,'XTick',[twin(1):.5:twin(2)]);
+    axis xy;
     
 end
 

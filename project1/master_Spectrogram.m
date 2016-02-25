@@ -1,28 +1,42 @@
-%% load the data files
-rootDir = '/Users/sirui/Documents/MATLAB/class/neuralDataAnalysis/Data/R016-2012-10-03';
-cd(rootDir);
+%% some initial path settings
+restoredefaultpath; % start with a clean slate
+clear classes; 
+
+cd('/Users/sirui/Documents/MATLAB/fieldtrip'); % replace paths with yours
+ft_defaults;
+
+cd('/Users/sirui/Documents/MATLAB/neuraldata-w16/shared'); % replace paths with yours
+p = genpath(pwd); % create list of all folders from here
+addpath(p);
+
+set(0,'DefaultAxesFontSize',18)
+
+%% load some data files from session R016-2012-10-03-CSC04a
+dataDir = '../../class/neuralDataAnalysis/Data/R016-2012-10-03'; % replace data paths with yours
+cd(dataDir);
 cfg = [];
 cfg.fc = {'R016-2012-10-03-CSC04a.ncs'};
 csc = LoadCSC(cfg);
-
-%% Load trials info
+Fs = csc.cfg.hdr{1,1}.SamplingFrequency;
+%% Load events info for this session
 cfg = [];
 cfg.eventList = {'Feeder 0 nosepoke','Feeder 1 nosepoke', ...
     '1 pellet cue','3 pellet cue','5 pellet cue', ...
     '1 pellet dispensed','3 pellet dispensed','5 pellet dispensed'};
-cfg.eventLabel = {'n0','n1', ...
-    'c1','c3','c5', ...
-    'd1','d3','d5'}; 
+cfg.eventLabel = {'n0','n1', 'c1','c3','c5','d1','d3','d5'}; 
 
 evt = LoadEvents(cfg);
 
-%% plot the spectrogram (frequency-dependent windowing) for each event
+%% plot the event-triggered spectrogram (frequency-dependent windowing) 
+%  for each event: average spectrogram over all trials 
+% (this may take a while!!)
 
 % Loading Neuralynx data into FieldTrip
 fc = {'R016-2012-10-03-CSC04a.ncs'};
 data = ft_read_neuralynx_interp(fc);
 
 for n = 1:length(evt.label) % for each trial type
+   
     % define and cut the data into trials
     cfg = [];
     cfg.t = getd(evt,evt.label{n});
@@ -42,7 +56,7 @@ for n = 1:length(evt.label) % for each trial type
     cfg.channel      = 'R016-2012-10-03-CSC04a';
     cfg.method       = 'mtmconvol';
     cfg.taper        = 'hanning';
-    cfg.foi          = 10:2:100; % frequencies of interest: 10hz to 100hz in steps of 1Hz(1/windowSizeinSec)
+    cfg.foi          = 10:2:100; % frequencies of interest: 10hz to 100hz in steps of 2Hz
     cfg.t_ftimwin    = 20./cfg.foi;
     cfg.toi          = -.5:0.05:3.5; % times of interest: time window "slides"
                                      % from -0.5 to 3.5 sec in steps of 0.05 sec (50 ms)
@@ -56,28 +70,34 @@ for n = 1:length(evt.label) % for each trial type
     cfg.channel = 'R016-2012-10-03-CSC04a';
     ft_singleplotTFR(cfg, TFR);
     title(evt.label{n},'FontSize',20);
-    colormap jet
+    set(gca,'FontSize',20);
+    set(gcf,'color','w')
+    set(gca,'XTick',[-.5:.5:3.5]);
+    axis xy; xlabel('time (s)'); ylabel('Frequency (Hz)');
+    colormap jet; colorbar('hide') 
 end
 
-%% plot event-triggered LFP traces for each event
-cd('/Users/sirui/Documents/MATLAB/class/neuralDataAnalysis/project1');
+%% plot event-triggered trial LFP traces for each event
+% cd to project folder
+analysisDir = '/Users/sirui/Documents/MATLAB/class/neuralDataAnalysis/project1';
+cd(analysisDir);
+% 
 cfg = [];
 cfg.eventLabel = evt.label;
 cfg.eventTimes = evt.t;
-cfg.r = 5;
-cfg.twin = [-1,4];
+cfg.twin = [-.5,3.5]; % time window
 % filter LFP
-cfg.filter.f = [10,90];
+cfg.filter.f = [70,80];
 cfg.filter.verbose = 0;
 % threshold LFP after filtering
 cfg.t.method = 'raw';
-cfg.t.threshold = 3;
+cfg.t.threshold = 5;
 cfg.t.operation = '>';
 cfg.t.merge_thr = .05;
 cfg.t.minlen = .05;
 cfg.t.verbose = 0;
 % plot the detected events on top of the LFP trace
-cfg.plot = 1; 
+cfg.plot = 2; 
 eventLFPplot(cfg,csc)
 
 
