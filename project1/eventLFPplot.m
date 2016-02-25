@@ -117,7 +117,10 @@ for ii = 1:length(cfg.eventTimes) % for each event
     plot([0,0],y1)
     set(gca,'FontSize',20);
     xlabel('time (s)'); ylabel('trial');
+    set(gca,'Xlim',[twin(1),twin(2)]);
+    set(gca,'Ylim',[0,length(cfg.eventTimes{ii})+2]);
     set(gca,'XTick',[twin(1):.5:twin(2)]);
+    set(gca,'YTick',[0:10:length(cfg.eventTimes{ii})]);
     axis xy;
     
 end
