@@ -28,7 +28,7 @@ cfg.eventLabel = {'n0','n1', 'c1','c3','c5','d1','d3','d5'};
 evt = LoadEvents(cfg);
 
 %% plot the event-triggered spectrogram (frequency-dependent windowing) 
-%  for each event: average spectrogram over all trials 
+%  for each event: average spectrogram over all trials with 4-second window
 % (this may take a while!!)
 
 % Loading Neuralynx data into FieldTrip
@@ -79,8 +79,9 @@ for n = 1:length(evt.label) % for each trial type
 end
 
 %% plot event-triggered trial LFP traces for each event
+
 % cd to project folder
-analysisDir = '../../project1';
+analysisDir = '../../project1'; % replace project path with yours
 cd(analysisDir);
 %%
 % event timestamps and time window

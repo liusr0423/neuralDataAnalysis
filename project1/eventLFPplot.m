@@ -58,12 +58,12 @@ for ii = 1:length(cfg.eventTimes) % for each event
         if isfield(cfg,'filter')
            
             ftrl = FilterLFP(cfg.filter,trl); % filter
-            
+
             if isfield(cfg,'t') % thresholding for event detection
                 
                 ftrl_p = LFPpower([],ftrl);       % obtain power envelope
                 ftrl_evt = TSDtoIV(cfg.t,ftrl_p); % detect events
-                
+
                 % replace the original time axis of detected events with a
                 % new one based on the time window asked for
                 ftrl_evt.tstart = ftrl_evt.tstart - (ftrl.tvec(1) - ...
