@@ -11,7 +11,7 @@ addpath(p);
 
 set(0,'DefaultAxesFontSize',18)
 
-%% load some data files from session R016-2012-10-03-CSC04a
+%% load data files from session R016-2012-10-03-CSC04a
 dataDir = '../../class/neuralDataAnalysis/Data/R016-2012-10-03'; % replace data paths with yours
 cd(dataDir);
 cfg = [];
@@ -88,7 +88,6 @@ end
 % cd to project folder
 analysisDir = '../../project1'; % replace project path with yours
 cd(analysisDir);
-%%
 % event timestamps and time window
 cfg = [];
 cfg.eventLabel = {'n0n1','c1c3c5','d1d3d5'};
