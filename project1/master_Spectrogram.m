@@ -35,11 +35,16 @@ evt = LoadEvents(cfg);
 fc = {'R016-2012-10-03-CSC04a.ncs'};
 data = ft_read_neuralynx_interp(fc);
 
-for n = 1:length(evt.label) % for each trial type
+eventLabel = {'n0n1','c1c3c5','d1d3d5'};
+eventTimes = {cat(2,getd(evt,'n0'),getd(evt,'n1')),...
+    cat(2,getd(evt,'c1'),getd(evt,'c3'),getd(evt,'c5')),...
+    cat(2,getd(evt,'d1'),getd(evt,'d3'),getd(evt,'d5'))};
+
+for n = 1:length(eventTimes) % for each trial type
    
     % define and cut the data into trials
     cfg = [];
-    cfg.t = getd(evt,evt.label{n});
+    cfg.t = eventTimes{n};
     cfg.mode = 'nlx';
     cfg.hdr = data.hdr;
     cfg.twin = [-1 4];
@@ -69,7 +74,7 @@ for n = 1:length(evt.label) % for each trial type
     cfg.baselinetype = 'relative';
     cfg.channel = 'R016-2012-10-03-CSC04a';
     ft_singleplotTFR(cfg, TFR);
-    title(evt.label{n},'FontSize',20);
+    title(eventLabel{n},'FontSize',20);
     set(gca,'FontSize',20);
     set(gcf,'color','w')
     set(gca,'XTick',[-.5:.5:3.5]);
