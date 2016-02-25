@@ -73,25 +73,31 @@ for n = 1:length(evt.label) % for each trial type
     set(gca,'FontSize',20);
     set(gcf,'color','w')
     set(gca,'XTick',[-.5:.5:3.5]);
+    set(gca,'YTick',[10:10:100]);
     axis xy; xlabel('time (s)'); ylabel('Frequency (Hz)');
     colormap jet; colorbar('hide') 
 end
 
 %% plot event-triggered trial LFP traces for each event
 % cd to project folder
-analysisDir = '/Users/sirui/Documents/MATLAB/class/neuralDataAnalysis/project1';
+analysisDir = '../../project1';
 cd(analysisDir);
-% 
+%%
+% event timestamps and time window
 cfg = [];
-cfg.eventLabel = evt.label;
-cfg.eventTimes = evt.t;
-cfg.twin = [-.5,3.5]; % time window
-% filter LFP
-cfg.filter.f = [70,80];
+cfg.eventLabel = {'n0n1','c1c3c5','d1d3d5'};
+cfg.eventTimes = {cat(2,getd(evt,'n0'),getd(evt,'n1')),...
+    cat(2,getd(evt,'c1'),getd(evt,'c3'),getd(evt,'c5')),...
+    cat(2,getd(evt,'d1'),getd(evt,'d3'),getd(evt,'d5'))};
+cfg.twin = [-.5,3.5]; 
+% filter LFP at 70 - 90 Hz passband
+cfg.filter.type = 'cheby1';
+cfg.filter.order = 5;
+cfg.filter.f = [70,90];
 cfg.filter.verbose = 0;
 % threshold LFP after filtering
-cfg.t.method = 'raw';
-cfg.t.threshold = 5;
+cfg.t.method = 'zscore';
+cfg.t.threshold = 3;
 cfg.t.operation = '>';
 cfg.t.merge_thr = .05;
 cfg.t.minlen = .05;

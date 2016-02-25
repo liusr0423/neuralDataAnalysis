@@ -17,9 +17,9 @@ function eventLFPplot(cfg,csc)
 %                  cfg.twin:       time window of interest (seconds
 %                                  relative to the event times), defualt
 %                                  is [-1 3]
-%                  cfg.filter.f:   filter options with defaults from
+%                  cfg.filter.f:   filter configurations with defaults from
 %                                  FilterLFP()
-%                  cfg.filter.t:   threshold options with defaults modified
+%                  cfg.filter.t:   threshold configurations with defaults 
 %                                  from TSDtoIV()
 %                  cfg.plot:       default = 0: plot the original LFP trace
 %                                  if 1 plot the filtered LFP trace
@@ -56,25 +56,13 @@ for ii = 1:length(cfg.eventTimes) % for each event
         
         % filtering trial LFP if specified
         if isfield(cfg,'filter')
-            
-            ftrl = FilterLFP(cfg.filter,trl);
+           
+            ftrl = FilterLFP(cfg.filter,trl); % filter
             
             if isfield(cfg,'t') % thresholding for event detection
-                % if specified
                 
-                ftrl_p = LFPpower([],ftrl);       % obtain power
-                ftrl_z = zscore_tsd(ftrl_p);      % z-score it
-                ftrl_evt = TSDtoIV(cfg.t,ftrl_z); % detect events
-                
-                % to each event, add a field with the max z-scored power
-                % (for later selection)
-                ftrl_evt = AddTSDtoIV(struct('method','max','label',...
-                    'maxP'),ftrl_evt,ftrl_z);
-                if ~isempty(ftrl_evt.usr.maxP)
-                    % select only those events of >5 z-scored power
-                    ftrl_evt = SelectIV(struct('operation','>',...
-                        'threshold',5),ftrl_evt,'maxP');
-                end
+                ftrl_p = LFPpower([],ftrl);       % obtain power envelope
+                ftrl_evt = TSDtoIV(cfg.t,ftrl_p); % detect events
                 
                 % replace the original time axis of detected events with a
                 % new one based on the time window asked for
