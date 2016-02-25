@@ -1,4 +1,4 @@
-Project 1: Spectrogram (module 7)
+#Project 1: Spectrogram (module 7)
 
 Codes used for plotting averaged event-triggered spectrogram and corresponding trial LFP traces for each event defined.
 
