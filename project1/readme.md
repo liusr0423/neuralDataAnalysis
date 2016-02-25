@@ -13,3 +13,4 @@ Run master_Spectrogram.m (replace code and data paths with yours) with following
    3.  Event Detection
 
 Used MATLAB R2015a running on Mac OS X
+Sirui Liu Feb-25-2016
