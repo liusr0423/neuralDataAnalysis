@@ -6,8 +6,8 @@ Run master_Spectrogram.m (replace code and data paths with yours) with following
 - Some initial path settings
 - Load some data files from session R016-2012-10-03-CSC04a
 - Load events info for this session
-- for each event type, plot the averaged event-triggered spectrogram (frequency-dependent windowing) over all trials
-- for each event type, plot the event-triggered trial LFP traces using eventLFPplot(cfg,csc) with the option of 
+- For each event type, plot the averaged event-triggered spectrogram (frequency-dependent windowing) over all trials
+- For each event type, plot the event-triggered trial LFP traces using eventLFPplot(cfg,csc) with the option of 
    1.  Decimate
    2.  Signal Filtering
    3.  Event Detection
