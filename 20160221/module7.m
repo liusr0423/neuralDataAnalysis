@@ -148,6 +148,13 @@ cfg.baseline     = [-2 0];
 cfg.baselinetype = 'relative';
 cfg.channel      = 'R016-2012-10-03-CSC04a';
 ft_singleplotTFR(cfg, TFR);
+title([evt.label{1:2}],'FontSize',20);
+set(gca,'FontSize',20);
+set(gcf,'color','w')
+set(gca,'XTick',[-.5:.5:3.5]);
+set(gca,'YTick',[10:10:100]);
+axis xy; xlabel('time (s)'); ylabel('Frequency (Hz)');
+colormap jet; colorbar('hide')
 
 %% Frequency-dependent windowing
 cfg              = []; % start with empty cfg
@@ -168,7 +175,13 @@ cfg.baseline     = [-2 0];
 cfg.baselinetype = 'relative';
 cfg.channel = 'R016-2012-10-03-CSC04a';
 ft_singleplotTFR(cfg, TFR);
-
+title([evt.label{1:2}],'FontSize',20);
+set(gca,'FontSize',20);
+set(gcf,'color','w')
+set(gca,'XTick',[-.5:.5:3.5]);
+set(gca,'YTick',[10:10:100]);
+axis xy; xlabel('time (s)'); ylabel('Frequency (Hz)');
+colormap jet; colorbar('hide')
 %% statistical tests
 % a statistical comparison of the pre-nosepoke baseline and the oscillation 
 % patterns following the nosepoke
