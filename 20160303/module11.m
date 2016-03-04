@@ -516,7 +516,7 @@ for iP = 1:4
     set(gca,'FontSize',14,'YLim',[0 0.5]);
     title([C.labelcmb{iP,:}]);
 end
-
+% C.grangerspctrm: x->x,y->x,x->y,y->y
 % top right plot (Y->X) has higher coefficients than the reverse (X->Y),
 % consistnet with the 4-sample advancement of Y relative to X
 
@@ -585,15 +585,34 @@ cfg.absnoise    = 0.5; % add independent noise to both signals
 data            = ft_connectivitysimulation(cfg);
 data.label      = {'X','Y'};
 
-%% 
+%% compute phase-slope:
+% 1. Fourier decomposition
+cfg_TFR = [];
+cfg_TFR.channel = {'X','Y'};
+cfg_TFR.channelcmb = {'X' 'Y'};
+cfg_TFR.method = 'mtmfft';
+cfg_TFR.output = 'fourier';
+cfg_TFR.foi = 1:1:150;
+cfg_TFR.taper = 'hanning';
+ 
+TFR = ft_freqanalysis(cfg_TFR,data);
+
+%% 2. use 'psi' as method for connectivity analysis
+cfg_psi = [];
+cfg_psi.method = 'psi';
+cfg_psi.bandwidth = 8; % number of frequencies to compute slope over
+cfg_psi.channel = {'X','Y'};
+cfg_psi.channelcmb = {'X' 'Y'};
+ 
+C = ft_connectivityanalysis(cfg_psi,TFR);
 
 
+%% plot the result
+figure;
+plot(C.freq,sq(C.psispctrm(2,1,:)));
+xlabel('Frequency'); ylabel('Phase slope');
 
-
-
-
-
-
+% C.psispctrm (row1: x->x,x->y;row2:y->x,y->y)
 
 
 
