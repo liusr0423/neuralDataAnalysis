@@ -25,8 +25,8 @@ LoadExpKeys;
 ExpKeys
 %% 
 cfg = [];
-cfg.fc = {'R020-2012-12-17-CSC03a.ncs','R020-2012-12-17-CSC03d.ncs'};
-cfg.label = {'3a','3d'};
+cfg.fc = {'R020-2012-12-17-CSC04d.ncs','R020-2012-12-17-CSC05c.ncs','R020-2012-12-17-CSC03c.ncs'};
+cfg.label = {'Str1','Str2','HC'};
 csc = LoadCSC(cfg);
  
 csc = restrict(csc,ExpKeys.TimeOnTrack(1),ExpKeys.TimeOffTrack(2)); % restrict to task
@@ -55,9 +55,10 @@ xlabel('Frequency (Hz)'); ylabel('Power (dB)');
 
 subplot(122); clear h;
 h(1) = plot(Fc{1},C{1,2},'LineWidth',2); hold on;
+h(2) = plot(Fc{1},C{1,3},'r','LineWidth',2);
 set(gca,'XLim',[0 150],'XTick',0:5:150,'FontSize',12); grid on;
-legend(h,{'3a-3d'},'Location','Northeast'); legend boxoff;
+legend(h,{'vStr1-vStr2','vStr1-HC'},'Location','Northeast'); legend boxoff;
 xlabel('Frequency (Hz)'); ylabel('Coherence');
 
 
-
+%% 
