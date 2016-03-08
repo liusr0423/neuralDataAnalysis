@@ -29,7 +29,7 @@ for ii = 1:length(HC_idx)
    HC_df{ii}(:) = dir([this_session(1:end-length('promoted_')),sprintf('-CSC0%d*.ncs',HC_idx(ii))]);
 end
 
-%% Load the two hippocampus and ventral striatum LFPs
+%% Load two hippocampus and ventral striatum LFPs
 cfg = [];
 cfg.fc = {HC_df{1}(1).name,ExpKeys.goodGamma{1}};
 cfg.label = {'HC','Str'};
@@ -64,7 +64,7 @@ xlabel('Frequency (Hz)'); ylabel('Coherence');
 % the PSD plot on the left shows that hippocampus has a clear theta  
 % (verified the correct hippocampus file selection) and ventral striatum 
 % has a large gamma component and;
-% there is an overal HC-vStr coherence value of 0.2 at around theta band 
+% there is an overal HC-vStr coherence peak at around theta band 
 
 %% task-based coherence analysis using ft
 cfg = [];
@@ -99,8 +99,8 @@ cfg.method       = 'mtmfft';
 cfg.taper        = 'hanning';
 cfg.foi          = 1:1:100; % frequencies to use
 cfg.keeptrials   = 'yes';
-cfg.channel      = {'HC','Str'};
-cfg.channelcmb   = {'HC','Str'}; % channel pairs to compute csd for
+cfg.channel      = {'HC' 'Str'};
+cfg.channelcmb   = {'HC' 'Str'}; % channel pairs to compute csd for
 
 TFR = ft_freqanalysis(cfg, data_trl);
 
