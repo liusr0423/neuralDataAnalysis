@@ -66,14 +66,14 @@ xlabel('Frequency (Hz)'); ylabel('Coherence');
 % has a large gamma component and;
 % there is an overal HC-vStr coherence peak at around theta band 
 
-%% task-based coherence analysis using ft
+%% task-based coherence analysis using fieldtrip
 cfg = [];
 cfg.fc = cat(2,HC_df{1}(1).name,ExpKeys.goodGamma(1));
 data = ft_read_neuralynx_interp(cfg.fc);
 data.label = {'HC','Str'};
 data.hdr.Fs = data.fsample;
 
-%% trilify: trials when rat noespoked into the reward receptacle
+%% trilify: trials when rat nosepoked into the reward receptacle
 data.hdr.Fs = data.fsample;
  
 cfg = [];
