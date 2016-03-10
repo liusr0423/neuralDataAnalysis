@@ -5,6 +5,7 @@ Codes used for connectivity analysis (spectral coherence and phase-slope index) 
 Run master_ConnectivityAnalysis.m (replace code and data paths with yours) with following steps:
 - Some initial path settings
 - Define and cd to R020 data folder
+
 For each data session: compute and plot
   * Overall comparison of HC-Str spectral coherence
   * Task-based spectral coherence using fieldtrip
