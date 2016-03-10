@@ -11,20 +11,20 @@ addpath(p);
 
 set(0,'DefaultAxesFontSize',10)
 
-%% cd to data folder
+%% define and cd to data folder
 df = 'R020';
 dataDir = ['/Users/liusirui/Documents/MATLAB/class/neuralDataAnalysis/Data/',df]; % replace data paths with yours
 cd(dataDir);
 dataFiles = dir([df,'*']);
 nSessions = length(dataFiles);
-%%
+%% For each data session
 for ss = 1:nSessions  % loop over sessions
     this_session = dataFiles(ss).name;
     cd(this_session);
-    LoadExpKeys;
+    LoadExpKeys; % load current data session 
     ExpKeys
-    %% find LFP file recorded from Hippocampus
     
+    % find LFP file recorded from Hippocampus
     HC_idx = find(ExpKeys.TetrodeTargets == strmatch('Hippocampus',ExpKeys.Target));
     HC_df = {};
     for ii = 1:length(HC_idx)
@@ -40,7 +40,7 @@ for ss = 1:nSessions  % loop over sessions
     csc = LoadCSC(cfg);
     csc = restrict(csc,ExpKeys.TimeOnTrack(1),ExpKeys.TimeOffTrack(2)); % restrict to task
     
-    % Compute the individual PSD for each LFP and the overall coherence between the pair
+    % Compute PSD for each LFP and the overall coherence between the pair
     Fs = csc.cfg.hdr{1}.SamplingFrequency;
     wsize = 2048;
     nS = length(csc.label);
@@ -51,6 +51,7 @@ for ss = 1:nSessions  % loop over sessions
             [C{iS,iS2},Fc{iS}] = mscohere(getd(csc,csc.label{iS}),getd(csc,csc.label{iS2}),hanning(wsize),wsize/2,2*wsize,Fs);
         end
     end
+    
     % plot
     figure
     subplot(121)
@@ -71,10 +72,12 @@ for ss = 1:nSessions  % loop over sessions
     title(sprintf('%s',this_session(1:end-9)));
     % the PSD plot on the left shows that hippocampus has a clear theta
     % (verified the correct hippocampus file selection) and ventral striatum
-    % has a large gamma component and;
-    % there is an overal HC-vStr coherence peak at around theta band
+    % has a large gamma component;
+    % coherence plot shows an overall HC-vStr coherence peak at 
+    % around theta band
     
     %% Task-based coherence analysis using fieldtrip
+    % load the data
     cfg = [];
     cfg.fc = cat(2,HC_df{1}(1).name,ExpKeys.goodGamma(1));
     data = ft_read_neuralynx_interp(cfg.fc);
@@ -142,7 +145,7 @@ for ss = 1:nSessions  % loop over sessions
     legend(h,lbl);
     title(sprintf('coherence spectrum (%s)',this_session(1:end-9)))
    
-    %% Task-based causality analysis: phase-slope analysis
+    %% Task-based causality analysis: phase-slope index
     % frequency decomposition
     cfg_TFR = [];
     cfg_TFR.output = 'fourier';
@@ -159,13 +162,13 @@ for ss = 1:nSessions  % loop over sessions
     cfg_psi.bandwidth = 4; % number of frequencies to compute slope over
     cfg_psi.channel = {'HC','Str'};
     cfg_psi.channelcmb = {'HC','Str'};   
-    C = ft_connectivityanalysis(cfg_psi,TFR_psi);
+    psi = ft_connectivityanalysis(cfg_psi,TFR_psi);
 
     % plot psi
     subplot(212)
     hold on
-    plot(C.freq,sq(C.psispctrm(1,2,:)).*(360/(2*pi)^2)); % convert to degrees/Hz
-    plot(C.freq, C.freq*0, '--r')
+    plot(psi.freq,sq(psi.psispctrm(1,2,:)).*(360/(2*pi)^2)); % convert to degrees/Hz
+    plot(psi.freq, psi.freq*0, '--r')
     title(sprintf('phase-slope (%s)',this_session(1:end-9)));
     set(gca,'XTick',0:10:100);
     xlim([0 100]);
@@ -174,8 +177,8 @@ for ss = 1:nSessions  % loop over sessions
     % positive means HC leads Str
     
     %% store everything for this session
-    All{ss}.psi.freq = C.freq;
-    All{ss}.psi.psispctrm = sq(C.psispctrm(1,2,:)).*(360/(2*pi)^2);
+    All{ss}.psi.freq = psi.freq;
+    All{ss}.psi.psispctrm = sq(psi.psispctrm(1,2,:)).*(360/(2*pi)^2);
     All{ss}.coh.cohspctrm = sq(fd_conn.cohspctrm(1,2,:));
     
     cd(dataDir); % back to root data folder
