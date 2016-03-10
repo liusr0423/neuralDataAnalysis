@@ -9,7 +9,7 @@ Run master_ConnectivityAnalysis.m (replace code and data paths with yours) with 
 For each data session: compute and plot
   * Overall comparison of HC-Str spectral coherence
   * Task-based spectral coherence using fieldtrip
-  * Task-based phase-slope index (psi)
+  * Task-based phase-slope index (psi) using fieldtrip
 
 Used MATLAB R2015a running on Mac OS X
 Sirui Liu March-10-2016
