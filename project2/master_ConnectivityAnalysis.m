@@ -126,6 +126,10 @@ for ss = 1:nSessions  % loop over sessions
     imagesc(fd_ppc.time,fd_ppc.freq,sq(fd_ppc.ppcspctrm(1,:,:))); 
     axis xy; colorbar; colormap jet;
     xlabel('time (s)'); ylabel('Frequency (Hz)'); title(lbl);
+    % time-frequency coherence spectrums for all sessions 
+    % show similar theta band (~8Hz) coherence peak 1s around
+    % nosepoke onset (t=0) and also similar beta band (~15-20Hz) coherence 
+    % peak before nosepoke onset 
     %%
     % compute coherence from the cross-spectrum and the indvidual spectra
     cfg            = [];
@@ -143,7 +147,9 @@ for ss = 1:nSessions  % loop over sessions
     ylabel('Coherence');
     legend(h,lbl);
     title(sprintf('coherence spectrum (%s)',this_session(1:end-9)))
-   
+    % coherence spectrums for all sessions show similar coherence peak 
+    % around theta band (~8Hz) 
+    
     %% Task-based causality analysis: phase-slope index
     % frequency decomposition
     cfg_TFR = [];
@@ -172,9 +178,11 @@ for ss = 1:nSessions  % loop over sessions
     xlim([0 100]);
     set(gca,'XTick',0:10:100);
     xlabel('Frequency (Hz)'); ylabel('Phase slope (?/Hz)');
-    
     % positive means HC leads Str
     
+    % five out of seven psi plots show similar positive phase slope around
+    % theta band (~8Hz) (HC->Str) and the rest is negative around theta band
+    % (Str->HC)
     %% store everything for this session
     All{ss}.psi.freq = psi.freq;
     All{ss}.psi.psispctrm = sq(psi.psispctrm(1,2,:)).*(360/(2*pi)^2);
