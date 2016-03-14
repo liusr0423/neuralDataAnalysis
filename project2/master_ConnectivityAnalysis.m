@@ -17,7 +17,8 @@ dataDir = ['/Users/liusirui/Documents/MATLAB/class/neuralDataAnalysis/Data/',df]
 cd(dataDir);
 dataFiles = dir([df,'*']);
 nSessions = length(dataFiles);
-%% For each data session
+
+%% for each data session
 for ss = 1:nSessions  % loop over sessions
     this_session = dataFiles(ss).name;
     cd(this_session);
@@ -137,9 +138,7 @@ for ss = 1:nSessions  % loop over sessions
     lbl = cat(2,fd_conn.labelcmb{1}, '-', fd_conn.labelcmb{2});
     h = plot(fd_conn.freq, nanmean(sq(fd_conn.cohspctrm(1,:,:)),2));
     hold on;
-    
-    set(gca,'XTick',0:10:100);
-    xlim([0,100]);
+    xlim([0,100]);set(gca,'XTick',0:10:100);
     xlabel('Frequency (Hz)');
     ylabel('Coherence');
     legend(h,lbl);
@@ -170,8 +169,8 @@ for ss = 1:nSessions  % loop over sessions
     plot(psi.freq,sq(psi.psispctrm(1,2,:)).*(360/(2*pi)^2)); % convert to degrees/Hz
     plot(psi.freq, psi.freq*0, '--r')
     title(sprintf('phase-slope (%s)',this_session(1:end-9)));
-    set(gca,'XTick',0:10:100);
     xlim([0 100]);
+    set(gca,'XTick',0:10:100);
     xlabel('Frequency (Hz)'); ylabel('Phase slope (?/Hz)');
     
     % positive means HC leads Str
@@ -179,7 +178,7 @@ for ss = 1:nSessions  % loop over sessions
     %% store everything for this session
     All{ss}.psi.freq = psi.freq;
     All{ss}.psi.psispctrm = sq(psi.psispctrm(1,2,:)).*(360/(2*pi)^2);
-    All{ss}.coh.cohspctrm = sq(fd_conn.cohspctrm(1,2,:));
+    All{ss}.coh.cohspctrm = nanmean(sq(fd_conn.cohspctrm(1,:,:)),2);
     
     cd(dataDir); % back to root data folder
 end
