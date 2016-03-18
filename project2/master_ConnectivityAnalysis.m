@@ -184,9 +184,41 @@ for ss = 1:nSessions  % loop over sessions
     % theta band (~8Hz) (HC->Str) and the rest is negative around theta band
     % (Str->HC)
     %% store everything for this session
-    All{ss}.psi.freq = psi.freq;
-    All{ss}.psi.psispctrm = sq(psi.psispctrm(1,2,:)).*(360/(2*pi)^2);
-    All{ss}.coh.cohspctrm = nanmean(sq(fd_conn.cohspctrm(1,:,:)),2);
+    psifreqAll(:,ss) = psi.freq;
+    psispctrmAll(:,ss) = sq(psi.psispctrm(1,2,:)).*(360/(2*pi)^2);
+    cohfreqAll(:,ss) = fd_conn.freq;
+    cohAll(:,ss) = nanmean(sq(fd_conn.cohspctrm(1,:,:)),2);
     
     cd(dataDir); % back to root data folder
 end
+
+%% compute and plot averaged psi and coherence across sessions
+
+psispctrmMean = nanmean(psispctrmAll,2);
+psispctrmSE = nanstd(psispctrmAll,0,2) ./ sqrt(nSessions);
+cohMean = nanmean(cohAll,2);
+cohSE = nanstd(cohAll,0,2) ./ sqrt(nSessions);
+
+% plot coherence spectrum
+figure;
+subplot(211)
+%h = plot(fd_conn.freq, cohMean);
+h = mseb(fd_conn.freq,cohMean',cohSE');
+hold on;
+xlim([0,100]);set(gca,'XTick',0:10:100);xlabel('Frequency (Hz)');ylabel('Coherence');
+legend(cat(2,fd_conn.labelcmb{1}, '-', fd_conn.labelcmb{2}));
+title(sprintf('mean coherence spectrum (%s sessions from %s)',num2str(nSessions),df));
+hold off;
+% plot psi
+subplot(212)
+hold on
+%plot(psi.freq,psispctrmMean);
+lineProps.col{1} = 'r'; 
+mseb(psi.freq,psispctrmMean',psispctrmSE',lineProps);
+plot(psi.freq, psi.freq*0, '--b')
+title(sprintf('mean phase-slope (%s sessions from %s)',num2str(nSessions),df));
+legend(cat(2,fd_conn.labelcmb{1}, '->', fd_conn.labelcmb{2}));
+xlim([0 100]);set(gca,'XTick',0:10:100);xlabel('Frequency (Hz)'); ylabel('Phase slope (?/Hz)');
+% positive means HC leads Str
+
+    
